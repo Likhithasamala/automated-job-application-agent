@@ -1,0 +1,2619 @@
+{
+  "name": "Automated Job Application & Cover Letter Agent",
+  "description": "Scrapes LinkedIn hiring posts daily, filters them for genuine fit, writes a tailored application email with an LLM and sends it with a resume attached. Set credentials and the CANDIDATE PROFILE blocks before activating.",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert email copywriter for job applications. Write a unique, professional job application email.\n\n**Job Post:** {{ $json.postContent }}\n\n**Job Title:** {{ $json.jobTitle }}\n**Experience the post asks for:** {{ $json.expLabel }}\n\n## CANDIDATE PROFILE - the ONLY source of facts about the applicant:\n\n* Name: Likhitha Samala\n* Total experience: 3.9 years (write it as \"nearly 4 years\" or \"around 4 years\", never a different number)\n* Core skills: Python, AI/ML, Generative AI, LLMs, RAG applications, Flask, n8n automation\n* Portfolio: https://likhitha-portfolio-neon.vercel.app/\n\n## TRUTH RULES - these override every other instruction below:\n\n* State the years of experience in the opening paragraph. Recruiters screen on it first.\n* Only name a technology if it appears in BOTH the candidate profile AND the job post.\n* If the post asks for a technology the candidate does not have, do NOT mention that\n  technology and do NOT claim familiarity with it. Lead with the overlapping skills instead.\n* Never invent employers, project names, metrics, certifications, notice periods or salary figures.\n* Never claim more than 3.9 years of experience, even if the post asks for more.\n\n\n## YOUR TASK:\n\nCreate an original job application email that feels natural and personalized, NOT like a template.\n\n## MANDATORY REQUIREMENTS:\n\n**SUBJECT LINE:**\n\n* Must include the job title from the post\n* Keep it simple and professional (6-10 words max)\n* Variations you can use: \"Applying for...\", \"Application for...\", \"Interested in...\", \"[Job Title] - Application\", etc.\n* DO NOT include skills or technologies in subject\n\n**BODY STRUCTURE:**\n\n1. **Greeting:** Use one of: Hey / Hello / Hi / Hi there\n\n2. **Opening paragraph:**\n\n   * Mention where you saw the job (LinkedIn)\n   * Reference the job title\n   * State nearly 4 years of experience explicitly\n   * Mention ONLY the skills shared by the candidate profile and this job post\n   * Express genuine interest and fit for the role\n   * Keep it 2-3 sentences maximum\n\n3. **Portfolio section:**\n\n   * Mention the portfolio naturally after the opening paragraph.\n   * Use one of the following variations:\n     * \"You can also explore some of my work here: https://likhitha-portfolio-neon.vercel.app/\"\n     * \"For additional details about my projects, please visit my portfolio: https://likhitha-portfolio-neon.vercel.app/\"\n     * \"I've also included my portfolio below for your reference: https://likhitha-portfolio-neon.vercel.app/\"\n     * \"My portfolio showcasing selected projects can be viewed here: https://likhitha-portfolio-neon.vercel.app/\"\n   * Keep it to one sentence only.\n   * DO NOT mention LinkedIn profile.\n\n4. **Resume section:**\n\n   * DO NOT include any resume link\n   * Mention the attached resume naturally using phrases like:\n     * \"Please find my resume attached for review.\"\n     * \"I've attached my resume for your consideration.\"\n     * \"My resume is attached for your reference.\"\n\n5. **Closing:**\n\n   * Keep it short and professional\n   * Use natural sign-offs like:\n     * \"Best regards\"\n     * \"Thanks & regards\"\n     * \"Looking forward to hearing from you\"\n     * \"Sincerely\"\n   * Add name:\n     Likhitha Samala\n\n## CRITICAL FORMATTING RULES:\n\n**YOU MUST USE PROPER LINE BREAKS:**\n\n* Between greeting and opening paragraph: Use \"\\n\\n\"\n* Between opening paragraph and portfolio section: Use \"\\n\\n\"\n* Between portfolio section and resume section: Use \"\\n\\n\"\n* Between resume section and closing: Use \"\\n\\n\"\n* Between closing and name: Use \"\\n\"\n\n## EXAMPLE FORMAT:\n\nHi there\\n\\nI came across your AI Engineer opening on LinkedIn and found the role closely aligned with my experience in Python, Machine Learning, and Generative AI applications. I’m very interested in contributing to AI-driven projects and backend development opportunities.\\n\\nYou can also explore some of my work here: https://likhitha-portfolio-neon.vercel.app/\\n\\nPlease find my resume attached for your review.\\n\\nBest regards\\nLikhitha Samala\n\n## VARIETY INSTRUCTIONS:\n\n* Vary wording naturally in every email\n* Avoid repetitive sentence structures\n* Make the email feel human-written and concise\n* Use a friendly but professional tone\n* Keep the email between 100-160 words\n\n## OUTPUT FORMAT:\n\nReturn ONLY valid JSON (no markdown, no code blocks, no explanations):\n\n{\n  \"subject\": \"[generated subject]\",\n  \"body\": \"[generated email body with proper \\\\n\\\\n and \\\\n spacing]\"\n}\n\n## IMPORTANT:\n\n1. NO resume link in the email.\n2. Mention the resume is ATTACHED.\n3. Include the portfolio link naturally after the opening paragraph:\n   https://likhitha-portfolio-neon.vercel.app/\n4. DO NOT mention LinkedIn profile.\n5. Use proper line breaks exactly as instructed.\n6. Keep it personalized and professional.\n7. Return ONLY the JSON object.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -3872,
+        1184
+      ],
+      "id": "0c518c3b-0245-4959-ae61-39110f61decb",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const total = items.length;\n\n// Calculate exact counts\nconst countA = Math.floor(total * 0.40);\nconst countB = Math.floor(total * 0.40);\nconst countC = total - (countA + countB);\n\nconst output = [];\n\nitems.forEach((item, index) => {\n  let route = \"\";\n\n  if (index < countA) {\n    route = \"A\";      // First 40%\n  } else if (index < countA + countB) {\n    route = \"B\";      // Next 40%\n  } else {\n    route = \"C\";      // Remaining 20%\n  }\n\n  output.push({\n    json: {\n      ...item.json,\n      route: route\n    }\n  });\n});\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4720,
+        2000
+      ],
+      "id": "ab623f3b-729d-4178-a474-d0d4baaf1f30",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "bc038ec2-145c-489f-9bdc-975ad10b9074",
+                    "leftValue": "={{$json.route}}",
+                    "rightValue": "A",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "40%"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fae7d424-43d4-4c08-b556-a611be819d4c",
+                    "leftValue": "={{$json.route}}",
+                    "rightValue": "B",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "20 %"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8ddf2652-7780-48d4-95e1-3d0e14d6247f",
+                    "leftValue": "={{$json.route}}",
+                    "rightValue": "C",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "40%"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -4528,
+        1968
+      ],
+      "id": "da5ef6aa-6227-43f7-b468-a2000184ffbc",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert email copywriter for job applications. Write a unique, professional job application email.\n\n**Job Post:** {{ $json.postContent }}\n\n**Job Title:** {{ $json.jobTitle }}\n**Experience the post asks for:** {{ $json.expLabel }}\n\n## CANDIDATE PROFILE - the ONLY source of facts about the applicant:\n\n* Name: Likhitha Samala\n* Total experience: 3.9 years (write it as \"nearly 4 years\" or \"around 4 years\", never a different number)\n* Core skills: Python, AI/ML, Generative AI, LLMs, RAG applications, Flask, n8n automation\n* Portfolio: https://likhitha-portfolio-neon.vercel.app/\n\n## TRUTH RULES - these override every other instruction below:\n\n* State the years of experience in the opening paragraph. Recruiters screen on it first.\n* Only name a technology if it appears in BOTH the candidate profile AND the job post.\n* If the post asks for a technology the candidate does not have, do NOT mention that\n  technology and do NOT claim familiarity with it. Lead with the overlapping skills instead.\n* Never invent employers, project names, metrics, certifications, notice periods or salary figures.\n* Never claim more than 3.9 years of experience, even if the post asks for more.\n\n\n## YOUR TASK:\n\nCreate an original job application email that feels natural and personalized, NOT like a template.\n\n## MANDATORY REQUIREMENTS:\n\n**SUBJECT LINE:**\n\n* Must include the job title from the post\n* Keep it simple and professional (6-10 words max)\n* Variations you can use: \"Applying for...\", \"Application for...\", \"Interested in...\", \"[Job Title] - Application\", etc.\n* DO NOT include skills or technologies in subject\n\n**BODY STRUCTURE:**\n\n1. **Greeting:** Use one of: Hey / Hello / Hi / Hi there\n\n2. **Opening paragraph:**\n\n   * Mention where you saw the job (LinkedIn)\n   * Reference the job title\n   * State nearly 4 years of experience explicitly\n   * Mention ONLY the skills shared by the candidate profile and this job post\n   * Express genuine interest and fit for the role\n   * Keep it 2-3 sentences maximum\n\n3. **Portfolio section:**\n\n   * Mention the portfolio naturally after the opening paragraph.\n   * Use one of the following variations:\n     * \"You can also explore some of my work here: https://likhitha-portfolio-neon.vercel.app/\"\n     * \"For additional details about my projects, please visit my portfolio: https://likhitha-portfolio-neon.vercel.app/\"\n     * \"I've also included my portfolio below for your reference: https://likhitha-portfolio-neon.vercel.app/\"\n     * \"My portfolio showcasing selected projects can be viewed here: https://likhitha-portfolio-neon.vercel.app/\"\n   * Keep it to one sentence only.\n   * DO NOT mention LinkedIn profile.\n\n4. **Resume section:**\n\n   * DO NOT include any resume link\n   * Mention the attached resume naturally using phrases like:\n     * \"Please find my resume attached for review.\"\n     * \"I've attached my resume for your consideration.\"\n     * \"My resume is attached for your reference.\"\n\n5. **Closing:**\n\n   * Keep it short and professional\n   * Use natural sign-offs like:\n     * \"Best regards\"\n     * \"Thanks & regards\"\n     * \"Looking forward to hearing from you\"\n     * \"Sincerely\"\n   * Add name:\n     Likhitha Samala\n\n## CRITICAL FORMATTING RULES:\n\n**YOU MUST USE PROPER LINE BREAKS:**\n\n* Between greeting and opening paragraph: Use \"\\n\\n\"\n* Between opening paragraph and portfolio section: Use \"\\n\\n\"\n* Between portfolio section and resume section: Use \"\\n\\n\"\n* Between resume section and closing: Use \"\\n\\n\"\n* Between closing and name: Use \"\\n\"\n\n## EXAMPLE FORMAT:\n\nHi there\\n\\nI came across your AI Engineer opening on LinkedIn and found the role closely aligned with my experience in Python, Machine Learning, and Generative AI applications. I’m very interested in contributing to AI-driven projects and backend development opportunities.\\n\\nYou can also explore some of my work here: https://likhitha-portfolio-neon.vercel.app/\\n\\nPlease find my resume attached for your review.\\n\\nBest regards\\nLikhitha Samala\n\n## VARIETY INSTRUCTIONS:\n\n* Vary wording naturally in every email\n* Avoid repetitive sentence structures\n* Make the email feel human-written and concise\n* Use a friendly but professional tone\n* Keep the email between 100-160 words\n\n## OUTPUT FORMAT:\n\nReturn ONLY valid JSON (no markdown, no code blocks, no explanations):\n\n{\n  \"subject\": \"[generated subject]\",\n  \"body\": \"[generated email body with proper \\\\n\\\\n and \\\\n spacing]\"\n}\n\n## IMPORTANT:\n\n1. NO resume link in the email.\n2. Mention the resume is ATTACHED.\n3. Include the portfolio link naturally after the opening paragraph:\n   https://likhitha-portfolio-neon.vercel.app/\n4. DO NOT mention LinkedIn profile.\n5. Use proper line breaks exactly as instructed.\n6. Keep it personalized and professional.\n7. Return ONLY the JSON object.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -4016,
+        1968
+      ],
+      "id": "0c447f19-bcf9-408d-9683-92714fadf0dd",
+      "name": "AI Agent5"
+    },
+    {
+      "parameters": {
+        "sendTo": "=your.address@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -4944,
+        1264
+      ],
+      "id": "35c25828-4025-47dc-ae27-d0fc9184b887",
+      "name": "Send a message8",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const validItems = [];\n\nfor (const item of items) {\n  const aiOutputString = item.output || item.json.output;\n  \n  // Skip items without valid AI output - DON'T throw error\n  if (!aiOutputString || typeof aiOutputString !== 'string') {\n    console.log(\"⚠️ Skipping item - Missing AI output\");\n    continue; // Skip this item, continue with next\n  }\n  \n  try {\n    const parsedData = JSON.parse(aiOutputString);\n    \n    if (!parsedData.subject || !parsedData.body) {\n      console.log(\"⚠️ Skipping item - Missing subject or body\");\n      continue; // Skip this item, continue with next\n    }\n    \n    if (parsedData.subject.includes(\"Error\") || parsedData.body.includes(\"Error\")) {\n      console.log(\"⚠️ Skipping item - AI returned error\");\n      continue; // Skip this item, continue with next\n    }\n    \n    item.json.subject = parsedData.subject;\n    item.json.body = parsedData.body.replace(/\\\\n/g, '\\n');\n    \n    validItems.push(item);\n    \n  } catch (e) {\n    console.log(\"⚠️ Skipping item - Parse error:\", e.message);\n    continue; // Skip this item, continue with next\n  }\n}\n\n// Return valid items - even if empty array\nconsole.log(`✅ Processed ${validItems.length} valid items out of ${items.length} total`);\nreturn validItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3424,
+        2704
+      ],
+      "id": "fa62c217-f7b4-4716-9e41-e0419c646b23",
+      "name": "Code in JavaScript11"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert email copywriter for job applications. Write a unique, professional job application email.\n\n**Job Post:** {{ $json.postContent }}\n\n**Job Title:** {{ $json.jobTitle }}\n**Experience the post asks for:** {{ $json.expLabel }}\n\n## CANDIDATE PROFILE - the ONLY source of facts about the applicant:\n\n* Name: Likhitha Samala\n* Total experience: 3.9 years (write it as \"nearly 4 years\" or \"around 4 years\", never a different number)\n* Core skills: Python, AI/ML, Generative AI, LLMs, RAG applications, Flask, n8n automation\n* Portfolio: https://likhitha-portfolio-neon.vercel.app/\n\n## TRUTH RULES - these override every other instruction below:\n\n* State the years of experience in the opening paragraph. Recruiters screen on it first.\n* Only name a technology if it appears in BOTH the candidate profile AND the job post.\n* If the post asks for a technology the candidate does not have, do NOT mention that\n  technology and do NOT claim familiarity with it. Lead with the overlapping skills instead.\n* Never invent employers, project names, metrics, certifications, notice periods or salary figures.\n* Never claim more than 3.9 years of experience, even if the post asks for more.\n\n\n## YOUR TASK:\n\nCreate an original job application email that feels natural and personalized, NOT like a template.\n\n## MANDATORY REQUIREMENTS:\n\n**SUBJECT LINE:**\n\n* Must include the job title from the post\n* Keep it simple and professional (6-10 words max)\n* Variations you can use: \"Applying for...\", \"Application for...\", \"Interested in...\", \"[Job Title] - Application\", etc.\n* DO NOT include skills or technologies in subject\n\n**BODY STRUCTURE:**\n\n1. **Greeting:** Use one of: Hey / Hello / Hi / Hi there\n\n2. **Opening paragraph:**\n\n   * Mention where you saw the job (LinkedIn)\n   * Reference the job title\n   * State nearly 4 years of experience explicitly\n   * Mention ONLY the skills shared by the candidate profile and this job post\n   * Express genuine interest and fit for the role\n   * Keep it 2-3 sentences maximum\n\n3. **Portfolio section:**\n\n   * Mention the portfolio naturally after the opening paragraph.\n   * Use one of the following variations:\n     * \"You can also explore some of my work here: https://likhitha-portfolio-neon.vercel.app/\"\n     * \"For additional details about my projects, please visit my portfolio: https://likhitha-portfolio-neon.vercel.app/\"\n     * \"I've also included my portfolio below for your reference: https://likhitha-portfolio-neon.vercel.app/\"\n     * \"My portfolio showcasing selected projects can be viewed here: https://likhitha-portfolio-neon.vercel.app/\"\n   * Keep it to one sentence only.\n   * DO NOT mention LinkedIn profile.\n\n4. **Resume section:**\n\n   * DO NOT include any resume link\n   * Mention the attached resume naturally using phrases like:\n     * \"Please find my resume attached for review.\"\n     * \"I've attached my resume for your consideration.\"\n     * \"My resume is attached for your reference.\"\n\n5. **Closing:**\n\n   * Keep it short and professional\n   * Use natural sign-offs like:\n     * \"Best regards\"\n     * \"Thanks & regards\"\n     * \"Looking forward to hearing from you\"\n     * \"Sincerely\"\n   * Add name:\n     Likhitha Samala\n\n## CRITICAL FORMATTING RULES:\n\n**YOU MUST USE PROPER LINE BREAKS:**\n\n* Between greeting and opening paragraph: Use \"\\n\\n\"\n* Between opening paragraph and portfolio section: Use \"\\n\\n\"\n* Between portfolio section and resume section: Use \"\\n\\n\"\n* Between resume section and closing: Use \"\\n\\n\"\n* Between closing and name: Use \"\\n\"\n\n## EXAMPLE FORMAT:\n\nHi there\\n\\nI came across your AI Engineer opening on LinkedIn and found the role closely aligned with my experience in Python, Machine Learning, and Generative AI applications. I’m very interested in contributing to AI-driven projects and backend development opportunities.\\n\\nYou can also explore some of my work here: https://likhitha-portfolio-neon.vercel.app/\\n\\nPlease find my resume attached for your review.\\n\\nBest regards\\nLikhitha Samala\n\n## VARIETY INSTRUCTIONS:\n\n* Vary wording naturally in every email\n* Avoid repetitive sentence structures\n* Make the email feel human-written and concise\n* Use a friendly but professional tone\n* Keep the email between 100-160 words\n\n## OUTPUT FORMAT:\n\nReturn ONLY valid JSON (no markdown, no code blocks, no explanations):\n\n{\n  \"subject\": \"[generated subject]\",\n  \"body\": \"[generated email body with proper \\\\n\\\\n and \\\\n spacing]\"\n}\n\n## IMPORTANT:\n\n1. NO resume link in the email.\n2. Mention the resume is ATTACHED.\n3. Include the portfolio link naturally after the opening paragraph:\n   https://likhitha-portfolio-neon.vercel.app/\n4. DO NOT mention LinkedIn profile.\n5. Use proper line breaks exactly as instructed.\n6. Keep it personalized and professional.\n7. Return ONLY the JSON object.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -3904,
+        2704
+      ],
+      "id": "49d33249-1509-4b94-9401-04fceefa5b76",
+      "name": "AI Agent6"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -3152,
+        2704
+      ],
+      "id": "2e19beab-c4c3-48b4-bd63-35050da38e3e",
+      "name": "Loop Over Items5",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "amount": "={{$json.waitSeconds}}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3344,
+        2544
+      ],
+      "id": "76cde661-a340-428a-840b-d4ec36ac9419",
+      "name": "Wait7",
+      "webhookId": "c7d123f0-9c9e-4fa5-8f97-847a14d23ebc"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Random wait between 110 sec (min) and 360 sec (max)\nconst min = 110;\nconst max = 360;\n\nconst delay = Math.floor(Math.random() * (max - min + 1)) + min;\n\nreturn [\n  {\n    json: {\n      waitSeconds: delay\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3536,
+        2544
+      ],
+      "id": "12b36069-d0e4-4432-aeb8-70a15479a88f",
+      "name": "Code in JavaScript13"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process each item and add a random templateId to it\nfor (let i = 0; i < items.length; i++) {\n  const templateNumber = Math.floor(Math.random() * 5) + 1;\n  \n  items[i].json.templateId = templateNumber;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4128,
+        1184
+      ],
+      "id": "e51ebb3f-9d87-4f58-9167-99156cccaf47",
+      "name": "Code in JavaScript14"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process each item and add a random templateId to it\nfor (let i = 0; i < items.length; i++) {\n  const templateNumber = Math.floor(Math.random() * 5) + 1;\n  \n  items[i].json.templateId = templateNumber;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4176,
+        2704
+      ],
+      "id": "bee09d57-5850-4e38-837f-ba2d0f2fba5c",
+      "name": "Code in JavaScript15"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process each item and add a random templateId to it\nfor (let i = 0; i < items.length; i++) {\n  const templateNumber = Math.floor(Math.random() * 5) + 1;\n  \n  items[i].json.templateId = templateNumber;\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4224,
+        1968
+      ],
+      "id": "a931528c-6968-463d-91ea-61d46c4ee5a7",
+      "name": "Code in JavaScript16"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json['gmailid '] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "resume"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1872,
+        2784
+      ],
+      "id": "03d790ad-2b67-4245-ac0a-7faea3bd2e63",
+      "name": "MAIL 3",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the merged data\nconst data = $input.item.json.myMergedData || [];\n\n// Get current date\nconst today = new Date();\nconst dateStr = today.toLocaleDateString('en-GB', { \n  day: 'numeric', \n  month: 'long', \n  year: 'numeric' \n});\n\n// Create email subject\nconst subject = `LinkedIn Job Applied List - ${dateStr}`;\n\n// Create email body\nlet emailBody = `LinkedIn Job Application Summary - ${dateStr}\\n\\n`;\nemailBody += `Total Applications Sent: ${data.length}\\n`;\nemailBody += `${'='.repeat(78)}\\n\\n`;\n\n// Add each job application\ndata.forEach((job, index) => {\n  emailBody += `${index + 1}. APPLICATION DETAILS\\n`;\n  emailBody += `${'-'.repeat(78)}\\n`;\n  emailBody += `📧 Sent To: ${job.emailId || 'Not specified'}\\n\\n`;\n  emailBody += `📝 Post Content:\\n${job.postContent || 'No content available'}\\n\\n`;\n  emailBody += `🔗 Post URL:\\n${job.postUrl || 'No URL available'}\\n\\n`;\n  emailBody += `${'='.repeat(78)}\\n\\n`;\n});\n\n// Return formatted data for email\nreturn {\n  json: {\n    subject: subject,\n    body: emailBody,\n    totalApplications: data.length,\n    date: dateStr\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4944,
+        1504
+      ],
+      "id": "95e2118c-a3a6-41d4-9b63-7514584be0bc",
+      "name": "Code in JavaScript12",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=YOUR_RESUME_FILE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2064,
+        2800
+      ],
+      "id": "87f998da-5c59-487e-985a-1e6ec6fbde07",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "text": "={{ $('Edit Fields4').item.json.postContent }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "jobType",
+              "description": "Analyze the job post content and classify it into exactly ONE category: \"AI\" for AI/ML/Data Science/Automation jobs, \"Development\" for web development/WordPress/full-stack/frontend/backend jobs, or \"Other\" if it doesn't clearly match AI or Development. Return only the word: AI, Development, or Other."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are a job classification expert. Analyze the job description and classify it into ONE category:\n\n**AI Category:**\n- Machine Learning, Deep Learning, AI/ML Engineer\n- Data Science, Data Analyst, ML Engineer\n- NLP, LLM, GPT-related roles\n- AI Automation, AI Developer\n- Computer Vision, Neural Networks\n- TensorFlow, PyTorch, Scikit-learn\n\n**Development Category:**\n- Web Developer, Full Stack Developer\n- WordPress Developer, PHP Developer\n- Frontend Developer (React, Vue, Angular)\n- Backend Developer (Node.js, Django, etc.)\n- MERN/MEAN Stack\n- Software Engineer, Software Developer\n\n**Other Category:**\n- Jobs that don't clearly fit AI or Development\n- Mixed roles without clear focus\n- Non-tech positions\n\nReturn ONLY one word: AI, Development, or Other"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -2976,
+        2784
+      ],
+      "id": "2669a2ba-e1b7-410d-ad1e-34b3553e0b74",
+      "name": "Information Extractor1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fix-ai",
+                    "leftValue": "={{ $json.JobType }}",
+                    "rightValue": "AI",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fix-full-stack",
+                    "leftValue": "={{ $json.JobType }}",
+                    "rightValue": "Full Stack",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fix-devops",
+                    "leftValue": "={{ $json.JobType }}",
+                    "rightValue": "DevOps",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 2
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -2528,
+        2784
+      ],
+      "id": "95b6c7c6-68d0-40fd-9638-26cf578e02e3",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4a17d59f-8970-40b1-9d7a-47138dca23db",
+              "name": "subject",
+              "value": "={{ $('Code in JavaScript11').item.json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "7c69ca1a-4386-43c7-b382-d6fbbf26e55f",
+              "name": "body",
+              "value": "={{ $('Code in JavaScript11').item.json.body }}",
+              "type": "string"
+            },
+            {
+              "id": "85a15aaf-eb4e-4cd4-9c70-aa517e4d5c85",
+              "name": "gmailid ",
+              "value": "={{ $('Edit Fields4').item.json.emailId }}",
+              "type": "string"
+            },
+            {
+              "id": "e730a823-6b0d-4db1-a018-b9dd818de6ee",
+              "name": "JobType",
+              "value": "={{ $json.output.jobType }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2704,
+        2768
+      ],
+      "id": "daca927c-f046-44d8-8057-e9148ea453c6",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json['gmailid '] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "resume"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1808,
+        2976
+      ],
+      "id": "1e6e9be2-aece-4124-9214-15072f57d7c4",
+      "name": "MAIL ",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=YOUR_RESUME_FILE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2048,
+        2976
+      ],
+      "id": "ff69a7b8-a650-4f10-8472-fa0cdace62c4",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields').item.json['gmailid '] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "resume"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1888,
+        2560
+      ],
+      "id": "b0d7f125-13fe-49e8-a3a4-b2b1c522bbe3",
+      "name": "MAIL 5",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=YOUR_RESUME_FILE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2112,
+        2560
+      ],
+      "id": "18e7f66e-4d8e-4180-b447-4219acfac90b",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -3904,
+        2864
+      ],
+      "id": "2fb12578-26b6-484f-af41-981396c7c0c2",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "REPLACE_ME",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const validItems = [];\n\nfor (const item of items) {\n  const aiOutputString = item.output || item.json.output;\n  \n  // Skip items without valid AI output - DON'T throw error\n  if (!aiOutputString || typeof aiOutputString !== 'string') {\n    console.log(\"⚠️ Skipping item - Missing AI output\");\n    continue; // Skip this item, continue with next\n  }\n  \n  try {\n    const parsedData = JSON.parse(aiOutputString);\n    \n    if (!parsedData.subject || !parsedData.body) {\n      console.log(\"⚠️ Skipping item - Missing subject or body\");\n      continue; // Skip this item, continue with next\n    }\n    \n    if (parsedData.subject.includes(\"Error\") || parsedData.body.includes(\"Error\")) {\n      console.log(\"⚠️ Skipping item - AI returned error\");\n      continue; // Skip this item, continue with next\n    }\n    \n    item.json.subject = parsedData.subject;\n    item.json.body = parsedData.body.replace(/\\\\n/g, '\\n');\n    \n    validItems.push(item);\n    \n  } catch (e) {\n    console.log(\"⚠️ Skipping item - Parse error:\", e.message);\n    continue; // Skip this item, continue with next\n  }\n}\n\n// Return valid items - even if empty array\nconsole.log(`✅ Processed ${validItems.length} valid items out of ${items.length} total`);\nreturn validItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3424,
+        1968
+      ],
+      "id": "fad9a905-f71a-454a-a268-c9ec5d49b7a7",
+      "name": "Code in JavaScript19"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -3152,
+        1968
+      ],
+      "id": "c4c0b78a-ecef-4596-947a-7a974f8c25d4",
+      "name": "Loop Over Items",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "amount": "={{$json.waitSeconds}}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3344,
+        1808
+      ],
+      "id": "c455b8c6-3b4c-499f-93e3-9c2fbed1a1d1",
+      "name": "Wait",
+      "webhookId": "c7d123f0-9c9e-4fa5-8f97-847a14d23ebc"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Random wait between 110 sec (min) and 360 sec (max)\nconst min = 110;\nconst max = 360;\n\nconst delay = Math.floor(Math.random() * (max - min + 1)) + min;\n\nreturn [\n  {\n    json: {\n      waitSeconds: delay\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3504,
+        1792
+      ],
+      "id": "f2d5b1be-a2b1-43bc-abd3-7c55101f2e9d",
+      "name": "Code in JavaScript20"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields1').item.json['gmailid '] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "resume"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1888,
+        2032
+      ],
+      "id": "e364837c-4bbe-461c-98b4-774d8409fa73",
+      "name": "MAIL 6",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=YOUR_RESUME_FILE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2080,
+        2032
+      ],
+      "id": "60b0f8ac-473e-4612-9694-eabce2b366a5",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "text": "={{ $('Edit Fields4').item.json.postContent }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "jobType",
+              "description": "Analyze the job post content and classify it into exactly ONE category: \"AI\" for AI/ML/Data Science/Automation jobs, \"Development\" for web development/WordPress/full-stack/frontend/backend jobs, or \"Other\" if it doesn't clearly match AI or Development. Return only the word: AI, Development, or Other."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are a job classification expert. Analyze the job description and classify it into ONE category:\n\n**AI Category:**\n- Machine Learning, Deep Learning, AI/ML Engineer\n- Data Science, Data Analyst, ML Engineer\n- NLP, LLM, GPT-related roles\n- AI Automation, AI Developer\n- Computer Vision, Neural Networks\n- TensorFlow, PyTorch, Scikit-learn\n\n**Development Category:**\n- Web Developer, Full Stack Developer\n- WordPress Developer, PHP Developer\n- Frontend Developer (React, Vue, Angular)\n- Backend Developer (Node.js, Django, etc.)\n- MERN/MEAN Stack\n- Software Engineer, Software Developer\n\n**Other Category:**\n- Jobs that don't clearly fit AI or Development\n- Mixed roles without clear focus\n- Non-tech positions\n\nReturn ONLY one word: AI, Development, or Other"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -2976,
+        2032
+      ],
+      "id": "09958124-d021-45f4-b304-b9be0c4b9f1c",
+      "name": "Information Extractor2"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fix-ai",
+                    "leftValue": "={{ $json.JobType }}",
+                    "rightValue": "AI",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fix-full-stack",
+                    "leftValue": "={{ $json.JobType }}",
+                    "rightValue": "Full Stack",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fix-devops",
+                    "leftValue": "={{ $json.JobType }}",
+                    "rightValue": "DevOps",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 2
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -2528,
+        2016
+      ],
+      "id": "72b95e3a-7c50-468e-a43c-75aff01e1d67",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4a17d59f-8970-40b1-9d7a-47138dca23db",
+              "name": "subject",
+              "value": "={{ $('Code in JavaScript19').item.json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "7c69ca1a-4386-43c7-b382-d6fbbf26e55f",
+              "name": "body",
+              "value": "={{ $('Code in JavaScript19').item.json.body }}",
+              "type": "string"
+            },
+            {
+              "id": "85a15aaf-eb4e-4cd4-9c70-aa517e4d5c85",
+              "name": "gmailid ",
+              "value": "={{ $('Edit Fields4').item.json.emailId }}",
+              "type": "string"
+            },
+            {
+              "id": "e730a823-6b0d-4db1-a018-b9dd818de6ee",
+              "name": "JobType",
+              "value": "={{ $json.output.jobType }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2704,
+        2032
+      ],
+      "id": "a14559b3-214b-4817-951b-28248ce2906f",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields1').item.json['gmailid '] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "resume"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1808,
+        2240
+      ],
+      "id": "76fa1849-460a-4827-8349-abefba6be54c",
+      "name": "MAIL 1",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=YOUR_RESUME_FILE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2048,
+        2240
+      ],
+      "id": "fd6ad66c-8a56-4423-8b21-1ebc9c216092",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields1').item.json['gmailid '] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "resume"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1888,
+        1824
+      ],
+      "id": "c65b127d-ee75-43d8-a4a9-6c38744f058e",
+      "name": "MAIL 7",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=YOUR_RESUME_FILE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2112,
+        1824
+      ],
+      "id": "a1b465e2-775b-46d1-bccf-8fd5e503a92b",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const validItems = [];\n\nfor (const item of items) {\n  const aiOutputString = item.output || item.json.output;\n  \n  // Skip items without valid AI output - DON'T throw error\n  if (!aiOutputString || typeof aiOutputString !== 'string') {\n    console.log(\"⚠️ Skipping item - Missing AI output\");\n    continue; // Skip this item, continue with next\n  }\n  \n  try {\n    const parsedData = JSON.parse(aiOutputString);\n    \n    if (!parsedData.subject || !parsedData.body) {\n      console.log(\"⚠️ Skipping item - Missing subject or body\");\n      continue; // Skip this item, continue with next\n    }\n    \n    if (parsedData.subject.includes(\"Error\") || parsedData.body.includes(\"Error\")) {\n      console.log(\"⚠️ Skipping item - AI returned error\");\n      continue; // Skip this item, continue with next\n    }\n    \n    item.json.subject = parsedData.subject;\n    item.json.body = parsedData.body.replace(/\\\\n/g, '\\n');\n    \n    validItems.push(item);\n    \n  } catch (e) {\n    console.log(\"⚠️ Skipping item - Parse error:\", e.message);\n    continue; // Skip this item, continue with next\n  }\n}\n\n// Return valid items - even if empty array\nconsole.log(`✅ Processed ${validItems.length} valid items out of ${items.length} total`);\nreturn validItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3360,
+        1184
+      ],
+      "id": "d57a806a-2edb-4a95-b760-8c7b19c5b4d3",
+      "name": "Code in JavaScript21"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -3088,
+        1184
+      ],
+      "id": "2f113cc0-597c-4634-ba1e-ff5dd6bc90aa",
+      "name": "Loop Over Items1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "amount": "={{$json.waitSeconds}}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3280,
+        992
+      ],
+      "id": "32c5576d-6a61-42ce-abf3-c7dfae1db64b",
+      "name": "Wait1",
+      "webhookId": "c7d123f0-9c9e-4fa5-8f97-847a14d23ebc"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Random wait between 110 sec (min) and 360 sec (max)\nconst min = 110;\nconst max = 360;\n\nconst delay = Math.floor(Math.random() * (max - min + 1)) + min;\n\nreturn [\n  {\n    json: {\n      waitSeconds: delay\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2704,
+        992
+      ],
+      "id": "9b839e32-0fdd-4f37-b501-2828d90884de",
+      "name": "Code in JavaScript22"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields3').item.json['gmailid '] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "resume"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1728,
+        1264
+      ],
+      "id": "43d992b1-1fe4-4904-b860-4bb343bf2725",
+      "name": "MAIL 8",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=YOUR_RESUME_FILE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2016,
+        1248
+      ],
+      "id": "288548eb-d8da-4ce7-904d-820fbc057753",
+      "name": "HTTP Request6"
+    },
+    {
+      "parameters": {
+        "text": "={{ $('Edit Fields4').item.json.postContent }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "jobType",
+              "description": "Analyze the job post content and classify it into exactly ONE category: 1) \"AI Engineer\" → for AI/ML, Python, Generative AI, LLM, RAG, NLP, Automation, n8n, LangChain, AI Agents, Data Science, Machine Learning, Deep Learning, OpenAI, Hugging Face, Computer Vision, Prompt Engineering related jobs. 2) \"Full Stack Developer\" → for Java, Spring Boot, React JS, Node.js, Web Development, Frontend, Backend, Full Stack, HTML, CSS, JavaScript, REST APIs, SQL, Microservices related jobs. 3) \"DevOps\" → for AWS, DevOps, CI/CD, Docker, Kubernetes, Linux, Jenkins, Terraform, Cloud, Monitoring, Infrastructure, GitHub Actions, Deployment, Azure, GCP related jobs."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are a job classification expert. Analyze the job description and classify it into ONE category.\n\n\nAI Engineer Category:\nAI Engineer, ML Engineer, AI Developer\nMachine Learning, Deep Learning\nPython Developer (AI/ML related)\nGenerative AI, LLM, GPT, RAG\nNLP, Computer Vision\nLangChain, OpenAI, Hugging Face\nAI Automation, AI Agents, n8n\nTensorFlow, PyTorch, Scikit-learn\nData Science, Predictive Modeling\n\nFull Stack Developer Category:\n\nJava Full Stack Developer\nSpring Boot Developer\nReact JS Developer\nFrontend Developer\nBackend Developer\nWeb Developer\nFull Stack Engineer\nHTML, CSS, JavaScript\nREST APIs, SQL, Microservices\nNode.js, React, Java, Web Applications\n\nDevOps Category:\n\nDevOps Engineer\nAWS Cloud Engineer\nCI/CD Engineer\nLinux Administrator\nDocker, Kubernetes\nJenkins, Terraform\nGitHub Actions\nInfrastructure Automation\nAzure, GCP, Cloud Deployment\nMonitoring, Server Management\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -2912,
+        1264
+      ],
+      "id": "d48d838e-ecb3-434f-a344-afed1a600379",
+      "name": "Information Extractor3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4a17d59f-8970-40b1-9d7a-47138dca23db",
+              "name": "subject",
+              "value": "={{ $('Code in JavaScript21').item.json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "7c69ca1a-4386-43c7-b382-d6fbbf26e55f",
+              "name": "body",
+              "value": "={{ $('Code in JavaScript21').item.json.body }}",
+              "type": "string"
+            },
+            {
+              "id": "85a15aaf-eb4e-4cd4-9c70-aa517e4d5c85",
+              "name": "gmailid ",
+              "value": "={{ $('Edit Fields4').item.json.emailId }}",
+              "type": "string"
+            },
+            {
+              "id": "e730a823-6b0d-4db1-a018-b9dd818de6ee",
+              "name": "JobType",
+              "value": "={{ $json.output.jobType }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2624,
+        1264
+      ],
+      "id": "f2a6c539-a740-4d9e-b1e9-18acfe03c2eb",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields3').item.json['gmailid '] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "resume"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1744,
+        1456
+      ],
+      "id": "d913a6b4-0afb-495a-b08f-e0a32f6d3718",
+      "name": "MAIL 2",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=YOUR_RESUME_FILE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1984,
+        1456
+      ],
+      "id": "8172d5a2-2601-4f09-8f89-46ef360aaf0f",
+      "name": "HTTP Request7"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Edit Fields3').item.json['gmailid '] }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "resume"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -1824,
+        1040
+      ],
+      "id": "a642c0de-02d7-446c-a313-9c3c4111b7b3",
+      "name": "MAIL 9",
+      "webhookId": "a4bbf684-b6c6-44d8-96a4-29b15c54ac0c",
+      "alwaysOutputData": true,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "REPLACE_ME",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://drive.google.com/uc?export=download&id=YOUR_RESUME_FILE_ID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "resume"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2032,
+        1040
+      ],
+      "id": "5ce7afb5-d859-43c6-928d-3217df9b968b",
+      "name": "HTTP Request8"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -2976,
+        2992
+      ],
+      "id": "2dac1063-dc8f-45e9-b068-c8ade1f4c021",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "REPLACE_ME",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -3168,
+        2256
+      ],
+      "id": "860eba4b-7e0a-4a33-9227-beb3b69eed9a",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "REPLACE_ME",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -3872,
+        1392
+      ],
+      "id": "888f1c51-c058-4e3b-96f5-91de7b27f4f1",
+      "name": "Groq Chat Model4",
+      "credentials": {
+        "groqApi": {
+          "id": "REPLACE_ME",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -2992,
+        1504
+      ],
+      "id": "e611114a-763b-46a9-b3dd-9f390527d19b",
+      "name": "Groq Chat Model5",
+      "credentials": {
+        "groqApi": {
+          "id": "REPLACE_ME",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-20b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -4016,
+        2144
+      ],
+      "id": "0e683202-dc90-4606-8407-7048be5a3b97",
+      "name": "Groq Chat Model6",
+      "credentials": {
+        "groqApi": {
+          "id": "REPLACE_ME",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const validItems = [];\n\nfor (const item of items) {\n  const aiOutputString = item.output || item.json.output;\n  \n  // Skip items without valid AI output - DON'T throw error\n  if (!aiOutputString || typeof aiOutputString !== 'string') {\n    console.log(\"⚠️ Skipping item - Missing AI output\");\n    continue; // Skip this item, continue with next\n  }\n  \n  try {\n    const parsedData = JSON.parse(aiOutputString);\n    \n    if (!parsedData.subject || !parsedData.body) {\n      console.log(\"⚠️ Skipping item - Missing subject or body\");\n      continue; // Skip this item, continue with next\n    }\n    \n    if (parsedData.subject.includes(\"Error\") || parsedData.body.includes(\"Error\")) {\n      console.log(\"⚠️ Skipping item - AI returned error\");\n      continue; // Skip this item, continue with next\n    }\n    \n    item.json.subject = parsedData.subject;\n    item.json.body = parsedData.body.replace(/\\\\n/g, '\\n');\n    \n    validItems.push(item);\n    \n  } catch (e) {\n    console.log(\"⚠️ Skipping item - Parse error:\", e.message);\n    continue; // Skip this item, continue with next\n  }\n}\n\n// Return valid items - even if empty array\nconsole.log(`✅ Processed ${validItems.length} valid items out of ${items.length} total`);\nreturn validItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3568,
+        1184
+      ],
+      "id": "a28b8b01-3746-4977-916d-353219e8cb40",
+      "name": "Code in JavaScript23"
+    },
+    {
+      "parameters": {
+        "jsCode": "const validItems = [];\n\nfor (const item of items) {\n  const aiOutputString = item.output || item.json.output;\n  \n  // Skip items without valid AI output - DON'T throw error\n  if (!aiOutputString || typeof aiOutputString !== 'string') {\n    console.log(\"⚠️ Skipping item - Missing AI output\");\n    continue; // Skip this item, continue with next\n  }\n  \n  try {\n    const parsedData = JSON.parse(aiOutputString);\n    \n    if (!parsedData.subject || !parsedData.body) {\n      console.log(\"⚠️ Skipping item - Missing subject or body\");\n      continue; // Skip this item, continue with next\n    }\n    \n    if (parsedData.subject.includes(\"Error\") || parsedData.body.includes(\"Error\")) {\n      console.log(\"⚠️ Skipping item - AI returned error\");\n      continue; // Skip this item, continue with next\n    }\n    \n    item.json.subject = parsedData.subject;\n    item.json.body = parsedData.body.replace(/\\\\n/g, '\\n');\n    \n    validItems.push(item);\n    \n  } catch (e) {\n    console.log(\"⚠️ Skipping item - Parse error:\", e.message);\n    continue; // Skip this item, continue with next\n  }\n}\n\n// Return valid items - even if empty array\nconsole.log(`✅ Processed ${validItems.length} valid items out of ${items.length} total`);\nreturn validItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3680,
+        1968
+      ],
+      "id": "9595c3d6-1444-4d85-a584-aee85513d779",
+      "name": "Code in JavaScript24"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fix-ai",
+                    "leftValue": "={{ $json.JobType }}",
+                    "rightValue": "AI",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fix-full-stack",
+                    "leftValue": "={{ $json.JobType }}",
+                    "rightValue": "Full Stack",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fix-devops",
+                    "leftValue": "={{ $json.JobType }}",
+                    "rightValue": "DevOps",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": 2
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -2432,
+        1248
+      ],
+      "id": "ac5415e1-3d8b-4341-8ab8-bc534f608f84",
+      "name": "Switch4"
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "urn",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        -6368,
+        2016
+      ],
+      "id": "4a2d0cee-24bf-4b1b-b00a-7a3279b6e746",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "actorId": {
+          "__rl": true,
+          "value": "buIWk2uOUzTmcLsuB",
+          "mode": "list",
+          "cachedResultName": "Linkedin Post Search Scraper (No Cookies) (harvestapi/linkedin-post-search)",
+          "cachedResultUrl": "https://console.apify.com/actors/buIWk2uOUzTmcLsuB/input"
+        },
+        "customBody": "={\n    \"contentType\": \"all\",\n    \"maxPosts\": 40,\n    \"maxReactions\": 0,\n    \"postNestedComments\": false,\n    \"postNestedReactions\": false,\n    \"postedLimit\": \"24h\",\n    \"scrapeComments\": false,\n    \"scrapeReactions\": false,\n    \"searchQueries\": [\n        \"hiring ai engineer\",\n        \"hiring python developer\",\n        \"hiring n8n developer\",\n        \"hiring wordpress developer\",\n        \"hiring ai engineer remote\",\n        \"hiring python developer remote \",\n        \"hiring web developer\",\n        \"hiring backend developer\"\n          \n      \n    ]\n}"
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -6352,
+        1792
+      ],
+      "id": "1ddca7b3-5956-46bb-bc48-d022d05bc52e",
+      "name": "Run an Actor1",
+      "credentials": {
+        "apifyApi": {
+          "id": "REPLACE_ME",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "Datasets",
+        "datasetId": "={{ $json.defaultDatasetId }}",
+        "limit": null,
+        "options": {}
+      },
+      "type": "@apify/n8n-nodes-apify.apify",
+      "typeVersion": 1,
+      "position": [
+        -6128,
+        1792
+      ],
+      "id": "4c174447-3ce3-4fa7-aa5f-fedf57551774",
+      "name": "Get dataset items1",
+      "alwaysOutputData": false,
+      "credentials": {
+        "apifyApi": {
+          "id": "REPLACE_ME",
+          "name": "Apify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.content }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "gmail id ",
+              "description": "The email address that applications should be sent to, exactly as written in the post. Empty string if the post contains no email address."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You extract the application email address from a LinkedIn hiring post.\n\nRULES:\n1. Return the address a candidate is told to send their CV or application to.\n2. Prefer an address appearing near words like apply, send, share, CV, resume, careers, hiring, hr, jobs, recruitment.\n3. If several addresses appear, return the single most likely application address.\n4. Return ONLY the raw address, lowercase, with no name, no mailto:, no angle brackets and no surrounding text.\n5. If the post contains NO email address, return an empty string. Never invent, guess, complete or correct an address."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -5728,
+        2032
+      ],
+      "id": "edd47ad7-4518-4823-b9c1-ca003355f683",
+      "name": "Information Extractor4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6509bd13-cdba-4394-a7cf-29b452f9ce47",
+              "leftValue": "={{ $json.output['gmail id '] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -5328,
+        2032
+      ],
+      "id": "e7154a57-2584-4716-9db4-173e360460ac",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -6688,
+        1792
+      ],
+      "id": "20c3b28e-6b24-4526-b9f5-5646ab2a5394",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "173f3f3f-484e-47c6-a24d-fb8b183031d3",
+              "name": "postContent",
+              "value": "={{ $('Code in JavaScript26').item.json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "6e74ce85-ded4-47b6-b4ae-c9afadcf7aee",
+              "name": "postUrl",
+              "value": "={{ $('Code in JavaScript26').item.json.linkedinUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "97de6ba8-488c-477a-8809-f0a1b9af6ecf",
+              "name": "emailId",
+              "value": "={{ $('If1').item.json.output['gmail id '] }}",
+              "type": "string"
+            },
+            {
+              "id": "gen-jobTitle",
+              "name": "jobTitle",
+              "value": "={{ $('Code in JavaScript26').item.json.jobTitle }}",
+              "type": "string"
+            },
+            {
+              "id": "gen-expLabel",
+              "name": "expLabel",
+              "value": "={{ $('Code in JavaScript26').item.json.expLabel }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -4960,
+        2016
+      ],
+      "id": "7ff0080e-f136-4039-b0f7-66fbe2ada69a",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all input items\nconst items = $input.all();\n\n// Process each item\nconst processedItems = items.map((item, index) => {\n  const json = item.json;\n  \n  // Check if 'urn' field is missing, null, undefined, or empty string\n  if (!json.urn || json.urn === '') {\n    // Generate a unique URN for this item\n    // Using timestamp + random number + index to ensure uniqueness\n    const timestamp = Date.now();\n    const random = Math.floor(Math.random() * 1000000);\n    const generatedUrn = `urn:li:activity:${timestamp}${random}${index}`;\n    \n    // Add the generated URN to the item\n    return {\n      json: {\n        ...json,\n        urn: generatedUrn\n      }\n    };\n  }\n  \n  // If URN exists, return item as-is\n  return item;\n});\n\n// Return all processed items\nreturn processedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5920,
+        1792
+      ],
+      "id": "80830e98-b3d0-464e-bcc9-bcdae01ae260",
+      "name": "Code in JavaScript25"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n//  JOB FIT FILTER  —  Likhitha (3.9 yrs experience)\n//  Runs BEFORE any LLM call or email, so Groq/Gmail/Apify\n//  budget is only spent on posts that are real job openings.\n//\n//  POLICY (set 2026-11-18, revision 2):\n//    * APPLY to any experience band — 1+, 4+, 7+, 9+, 10+ …\n//    * APPLY to fresher / trainee / entry-level / graduate roles\n//    * APPLY to posts that never state a number of years\n//    * The ONLY hard experience block is INTERNSHIPS.\n// ============================================================\n\n// ---- CONFIG (edit these, nothing else) ----------------------\nconst MIN_YEARS = 0;     // no lower bound\nconst MAX_YEARS = 99;    // no upper bound — 10+, 15+ roles are allowed\nconst ACCEPT_UNSTATED_EXPERIENCE = true;   // keep posts that never state years\nconst BLOCK_CSUITE = true;   // skip CEO/CTO/VP/Director-of-Engineering searches\nconst BLOCK_NONTECH = true;  // skip telecaller / sales / insurance / content-writer posts\n// -------------------------------------------------------------\n\n// THE ONE HARD BLOCK: internships only. \"trainee\", \"fresher\", \"entry level\",\n// \"graduate\" and \"stipend\" are deliberately NOT in here any more.\nconst RE_INTERN = /\\b(intern|interns|interning|internship|internships)\\b/i;\n\n// Only true C-suite / exec searches, not staff / principal / architect / manager.\nconst RE_CSUITE = /\\b(chief\\s+\\w+\\s+officer|\\bcto\\b|\\bceo\\b|\\bcfo\\b|\\bcoo\\b|vice\\s+president|vp\\s+of\\s+\\w+|head\\s+of\\s+(engineering|technology)|director\\s+of\\s+(engineering|technology))\\b/i;\n\nconst RE_NONTECH = /\\b(business\\s+development|sales\\s+(executive|manager|representative)|inside\\s+sales|tele\\s*caller|telesales|bpo\\b|voice\\s+process|customer\\s+(support|service)\\s+(executive|associate)|digital\\s+marketing|seo\\s+(executive|specialist)|content\\s+writer|graphic\\s+designer|video\\s+editor|accountant|field\\s+executive|insurance\\s+advisor|real\\s+estate)\\b/i;\n\n// Other job seekers' \"open to work\" posts — not employers, nothing to apply to.\nconst RE_SEEKER = /(open\\s*to\\s*(work|new\\s+opportunit|opportunit)|#opentowork|kindly\\s+refer|please\\s+refer\\s+me|refer\\s+me\\s+for|my\\s+resume\\s+is\\s+attached|i(?:'m|\\s+am)\\s+(currently\\s+)?(actively\\s+)?(looking|seeking|searching)\\s+(for|to)|actively\\s+seeking\\s+(a\\s+)?(new\\s+)?(job|role|opportunit)|available\\s+for\\s+(immediate\\s+)?(joining|opportunit))/i;\n\nconst RE_UNPAID = /\\b(unpaid|no\\s+salary|without\\s+salary|commission[\\s-]*(only|based)|equity[\\s-]*only|volunteer)\\b/i;\n\nconst RE_YEARS = /(\\d{1,2})\\s*(\\+)?\\s*(?:-|–|—|to)?\\s*(\\d{1,2})?\\s*(\\+)?\\s*(?:year|yr)s?\\b/gi;\n\nconst RE_ROLE_NOUN = /\\b(engineer|developer|programmer|scientist|analyst|specialist|consultant|administrator|devops|sre|trainee)\\b/i;\n\nfunction clean(s) {\n  return String(s || '')\n    .replace(/[\\u{1F300}-\\u{1FAFF}\\u{2600}-\\u{27BF}]/gu, ' ')\n    .replace(/\\*+/g, ' ')\n    .replace(/[ \\t]+/g, ' ')\n    .trim();\n}\n\nfunction stripLead(l) {\n  return l\n    .replace(/^(?:we(?:'re| are)?\\s+)?(?:urgently\\s+)?(?:now\\s+)?(?:hiring|looking for|seeking|required|opening for|job role|position|role|vacancy)\\s*[:\\-|,]?\\s*/i, '')\n    .replace(/^(?:a|an|for)\\s+/i, '')\n    .replace(/[|\\-–—:,!]+\\s*$/, '')\n    .trim();\n}\n\nfunction extractTitle(content) {\n  const lines = clean(content).split('\\n').map(l => l.trim()).filter(Boolean);\n  for (const l of lines) {\n    if (l.length <= 110 && RE_ROLE_NOUN.test(l)) {\n      const t = stripLead(l);\n      if (t.length >= 4 && RE_ROLE_NOUN.test(t)) return t.slice(0, 90);\n    }\n  }\n  const cue = /(hiring|looking for|opening|position|vacancy)/i;\n  for (const l of lines) {\n    if (cue.test(l) && l.length < 120) {\n      const t = stripLead(l);\n      if (t.length >= 4) return t.slice(0, 90);\n    }\n  }\n  return (lines[0] || '').slice(0, 90);\n}\n\nfunction parseYearRanges(text) {\n  const ranges = [];\n  let m;\n  RE_YEARS.lastIndex = 0;\n  while ((m = RE_YEARS.exec(text)) !== null) {\n    const lo = parseInt(m[1], 10);\n    const plus = Boolean(m[2] || m[4]);\n    const hi = m[3] != null ? parseInt(m[3], 10) : (plus ? Infinity : lo);\n    if (Number.isFinite(lo) && lo <= 40 && hi >= lo) ranges.push([lo, hi]);\n  }\n  return ranges;\n}\n\nfunction dedupeKey(content) {\n  const norm = clean(content).toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\\s+/g, ' ').slice(0, 180);\n  let h = 0;\n  for (let i = 0; i < norm.length; i++) { h = (h * 31 + norm.charCodeAt(i)) | 0; }\n  return 'fp_' + Math.abs(h).toString(36) + '_' + norm.length;\n}\n\nconst kept = [];\nconst rejected = [];\n\nfor (const item of $input.all()) {\n  const j = item.json;\n  const content = j.content || '';\n  const titleZone = clean(content).slice(0, 400);\n\n  let reason = null;\n  if (!content || clean(content).length < 60) reason = 'empty_or_too_short';\n  else if (RE_INTERN.test(content)) reason = 'internship';\n  else if (RE_SEEKER.test(titleZone)) reason = 'job_seeker_post';\n  else if (RE_UNPAID.test(content)) reason = 'unpaid_or_commission';\n  else if (BLOCK_CSUITE && RE_CSUITE.test(titleZone)) reason = 'c_suite_search';\n  else if (BLOCK_NONTECH && RE_NONTECH.test(titleZone)) reason = 'non_tech_role';\n\n  const ranges = reason ? [] : parseYearRanges(content);\n  let expMin = null, expMax = null, expLabel = 'not specified in the post';\n\n  if (!reason) {\n    if (ranges.length === 0) {\n      if (!ACCEPT_UNSTATED_EXPERIENCE) reason = 'experience_not_stated';\n    } else {\n      const fit = ranges.filter(([lo, hi]) => hi >= MIN_YEARS && lo <= MAX_YEARS);\n      if (fit.length === 0) {\n        reason = 'experience_out_of_band_' + Math.min(...ranges.map(r => r[0])) + '+';\n      } else {\n        expMin = Math.min(...fit.map(r => r[0]));\n        const hiFinite = fit.map(r => r[1]).filter(Number.isFinite);\n        expMax = hiFinite.length ? Math.max(...hiFinite) : null;\n        expLabel = expMax ? expMin + '-' + expMax + ' years' : expMin + '+ years';\n      }\n    }\n  }\n\n  if (reason) {\n    rejected.push(reason);\n    continue;\n  }\n\n  kept.push({\n    json: {\n      ...j,\n      jobTitle: extractTitle(content),\n      expMin,\n      expMax,\n      expLabel,\n      dedupeKey: dedupeKey(content),\n    },\n  });\n}\n\nconst counts = rejected.reduce((a, r) => { a[r] = (a[r] || 0) + 1; return a; }, {});\nconsole.log('JOB FILTER: kept ' + kept.length + ' of ' + (kept.length + rejected.length));\nconsole.log('rejected: ' + JSON.stringify(counts));\n\nreturn kept;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6128,
+        2016
+      ],
+      "id": "e99f0434-0e13-452a-8b49-85f8fc24c2ca",
+      "name": "Code in JavaScript26"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over all incoming items (which n8n sees as separate executions from the loop)\nconst allItems = $input.all();\n\n// Return a SINGLE item containing all data in a 'results' array\nreturn {\n  json: {\n    myMergedData: allItems.map(item => item.json)\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4944,
+        1744
+      ],
+      "id": "84d74ca2-1724-4aa8-809f-88e5bfa49ef3",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -5744,
+        2192
+      ],
+      "id": "24816c65-892f-49be-8f28-f11a278e5ff9",
+      "name": "Groq Chat Model7",
+      "credentials": {
+        "groqApi": {
+          "id": "REPLACE_ME",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 300
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -5136,
+        2032
+      ],
+      "id": "b0ea98b7-f248-41f8-82aa-e2f931e6687d",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.dedupeKey }}",
+        "options": {
+          "scope": "workflow",
+          "historySize": 5000
+        }
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        -5952,
+        2016
+      ],
+      "id": "aa11bb22-cc33-dd44-ee55-ff6677889900",
+      "name": "Dedupe Across Runs"
+    },
+    {
+      "parameters": {
+        "path": "job-apply-trigger",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -6688,
+        2304
+      ],
+      "id": "cafe0001-0002-0003-0004-000000000005",
+      "name": "Manual Run (Webhook)"
+    }
+  ],
+  "connections": {
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript23",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript14",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript16",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript15",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript24",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript11": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items5": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait7": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript13": {
+      "main": [
+        [
+          {
+            "node": "Wait7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript14": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript15": {
+      "main": [
+        [
+          {
+            "node": "AI Agent6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript16": {
+      "main": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAIL 3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript12": {
+      "main": [
+        [
+          {
+            "node": "Send a message8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "MAIL 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "MAIL ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAIL ": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "MAIL 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAIL 5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript13",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent6",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript19": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Information Extractor2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript20": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAIL 6": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript20",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "MAIL 6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAIL 1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript20",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "MAIL 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAIL 7": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript20",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request5": {
+      "main": [
+        [
+          {
+            "node": "MAIL 7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript21": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Information Extractor3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript22": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAIL 8": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript22",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request6": {
+      "main": [
+        [
+          {
+            "node": "MAIL 8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Switch4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAIL 2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript22",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request7": {
+      "main": [
+        [
+          {
+            "node": "MAIL 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MAIL 9": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript22",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request8": {
+      "main": [
+        [
+          {
+            "node": "MAIL 9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript23": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript21",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript24": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript19",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript26",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run an Actor1": {
+      "main": [
+        [
+          {
+            "node": "Get dataset items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get dataset items1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript25",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor4": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Run an Actor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript25": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript26": {
+      "main": [
+        [
+          {
+            "node": "Dedupe Across Runs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedupe Across Runs": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Run (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Run an Actor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timezone": "Asia/Kolkata"
+  }
+}
